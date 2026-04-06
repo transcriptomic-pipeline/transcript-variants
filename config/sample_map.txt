@@ -1,0 +1,17 @@
+# Sample map file. Lines starting with # are ignored.
+# Columns (tab-separated): SAMPLE_ID  TYPE  BAM_PATH
+# SAMPLE_ID : Unique identifier for the sample
+# TYPE      : tumor or normal (case-insensitive)
+# BAM_PATH  : Full or relative path to the input BAM file
+# If TYPE is not provided or cannot be determined from this file,
+# the pipeline will attempt auto-classification using name patterns:
+#   - tumor: names containing 'tumor', '_T', 'T_'
+#   - normal: names containing 'normal', '_N', 'N_'
+# MATCHED_WITH (optional 4th column): the paired sample ID (tumor->normal or normal->tumor)
+#   If not specified, pairing is attempted by shared numeric prefix (e.g. 1493_13_T <-> 1493_13_N)
+#
+# SAMPLE_ID         TYPE    BAM_PATH                                            MATCHED_WITH
+1493_13_T           tumor   /path/to/bams/1493_13_TAligned.sortedByCoord.out.bam    1493_13_N
+1493_13_N           normal  /path/to/bams/1493_13_NAligned.sortedByCoord.out.bam    1493_13_T
+3507_15_T           tumor   /path/to/bams/3507_15_TAligned.sortedByCoord.out.bam    3507_15_N
+3507_15_N           normal  /path/to/bams/3507_15_NAligned.sortedByCoord.out.bam    3507_15_T
