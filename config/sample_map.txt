@@ -10,8 +10,8 @@
 # MATCHED_WITH (optional 4th column): the paired sample ID (tumor->normal or normal->tumor)
 #   If not specified, pairing is attempted by shared numeric prefix (e.g. 1493_13_T <-> 1493_13_N)
 #
-# SAMPLE_ID         TYPE    BAM_PATH                                            MATCHED_WITH
-1493_13_T           tumor   /path/to/bams/1493_13_TAligned.sortedByCoord.out.bam    1493_13_N
-1493_13_N           normal  /path/to/bams/1493_13_NAligned.sortedByCoord.out.bam    1493_13_T
-3507_15_T           tumor   /path/to/bams/3507_15_TAligned.sortedByCoord.out.bam    3507_15_N
-3507_15_N           normal  /path/to/bams/3507_15_NAligned.sortedByCoord.out.bam    3507_15_T
+# SAMPLE_ID  TYPE  BAM_PATH  MATCHED_WITH
+1493_13_T  tumor  /path/to/bams/1493_13_TAligned.sortedByCoord.out.bam  1493_13_N
+1493_13_N  normal  /path/to/bams/1493_13_NAligned.sortedByCoord.out.bam  1493_13_T
+3507_15_T  tumor  /path/to/bams/3507_15_TAligned.sortedByCoord.out.bam  3507_15_N
+3507_15_N  normal  /path/to/bams/3507_15_NAligned.sortedByCoord.out.bam  3507_15_T
