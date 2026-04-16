@@ -1,91 +1,104 @@
 #!/bin/bash
-# scripts/download_gnomad.sh
-# Downloads gnomAD v4.1 genome VCFs per chromosome via gsutil,
-# merges with bcftools concat, indexes, and cleans up chr files.
-# If merged file already exists, skips download entirely.
-#
-# Usage: download_gnomad.sh --out-dir DIR [--threads INT] [--skip-if-exists]
-# Output: <OUT_DIR>/gnomad.genomes.v4.1.sites.merged.vcf.gz (+ .tbi)
+# scripts/download_gnomad.sh — Download and merge gnomAD v4.1 per-chromosome VCFs.
+# gnomAD v4.1 ships with chr-prefix (UCSC); handles conversion to nochr (Ensembl).
+# Prints final merged VCF path to stdout (captured by install.sh).
+# Requires: gsutil, bcftools, tabix
 
 set -euo pipefail
-log() { echo "[$(date '+%F %T')] [gnomAD] $*"; }
-err() { echo "[$(date '+%F %T')] ERROR: $*" >&2; exit 1; }
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG="$(dirname "$SCRIPT_DIR")/install.log"
+log()  { echo "[$(date '+%F %T')] $*" | tee -a "$LOG" >&2; }
+err()  { echo "[$(date '+%F %T')] ERROR: $*" | tee -a "$LOG" >&2; exit 1; }
 
-OUT_DIR=""
+OUT_DIR="${OUT_DIR:-$HOME/references/GRCh38}"
 THREADS=8
-CONCAT_THREADS=20
-SKIP_IF_EXISTS=true
+CHR_STYLE="nochr"
+GNOMAD_VERSION="4.1"
+GNOMAD_GCS="gs://gcp-public-data--gnomad/release/${GNOMAD_VERSION}/vcf/genomes"
+CHROMS=( {1..22} X Y )
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --out-dir)          OUT_DIR="$2"; shift 2 ;;
-    --threads)          THREADS="$2"; CONCAT_THREADS="$2"; shift 2 ;;
-    --no-skip)          SKIP_IF_EXISTS=false; shift ;;
-    -h|--help)
-      echo "Usage: download_gnomad.sh --out-dir DIR [--threads INT] [--no-skip]"
-      exit 0 ;;
+    --out-dir)     OUT_DIR="$2";   shift 2 ;;
+    --threads)     THREADS="$2";   shift 2 ;;
+    --chr-style)   CHR_STYLE="$2"; shift 2 ;;
+    --version)
+      GNOMAD_VERSION="$2"
+      GNOMAD_GCS="gs://gcp-public-data--gnomad/release/${GNOMAD_VERSION}/vcf/genomes"
+      shift 2 ;;
     *) err "Unknown option: $1" ;;
   esac
 done
 
-[[ -n "$OUT_DIR" ]] || err "--out-dir is required"
-mkdir -p "$OUT_DIR"
+[[ "$CHR_STYLE" == "nochr" || "$CHR_STYLE" == "chr" ]] \
+  || err "--chr-style must be 'nochr' or 'chr'"
 
-MERGED="$OUT_DIR/gnomad.genomes.v4.1.sites.merged.vcf.gz"
+command -v gsutil   &>/dev/null || err "gsutil not found. Install Google Cloud SDK."
+command -v bcftools &>/dev/null || err "bcftools not found."
+command -v tabix    &>/dev/null || err "tabix not found."
 
-# Skip entirely if merged file already present
-if $SKIP_IF_EXISTS && [[ -f "$MERGED" && -f "${MERGED}.tbi" ]]; then
-  log "Merged gnomAD already present — skipping download: $MERGED"
-  echo "$MERGED"
-  exit 0
+GNOMAD_DIR="$OUT_DIR/gnomad_v${GNOMAD_VERSION}_per_chrom"
+mkdir -p "$GNOMAD_DIR"
+
+MERGED_VCF="$OUT_DIR/gnomad.genomes.v${GNOMAD_VERSION}.sites.merged.${CHR_STYLE}.vcf.gz"
+
+if [[ -f "$MERGED_VCF" && -f "${MERGED_VCF}.tbi" ]]; then
+  log "gnomAD v${GNOMAD_VERSION} (${CHR_STYLE}) already merged: $MERGED_VCF"
+  echo "$MERGED_VCF"; exit 0
 fi
 
-# Check gsutil
-if ! command -v gsutil &>/dev/null; then
-  err "gsutil not found. Install Google Cloud SDK: https://cloud.google.com/sdk/docs/install"
+# Build chr->nochr rename map (gnomAD ships chr-prefix)
+RENAME_MAP="$OUT_DIR/gnomad_chr_to_nochr.map"
+if [[ "$CHR_STYLE" == "nochr" ]]; then
+  : > "$RENAME_MAP"
+  for c in {1..22} X Y; do
+    printf "chr%s\t%s\n" "$c" "$c" >> "$RENAME_MAP"
+  done
+  printf "chrM\tMT\n"  >> "$RENAME_MAP"
+  printf "chrMT\tMT\n" >> "$RENAME_MAP"
 fi
-command -v bcftools &>/dev/null || err "bcftools not found. Run install.sh first."
 
-WORK_DIR="$OUT_DIR/gnomad_genomes_v4_1_tmp"
-mkdir -p "$WORK_DIR"
+VCF_LIST=()
+for C in "${CHROMS[@]}"; do
+  GCS_VCF="${GNOMAD_GCS}/gnomad.genomes.v${GNOMAD_VERSION}.sites.chr${C}.vcf.bgz"
+  LOCAL_RAW="$GNOMAD_DIR/gnomad.v${GNOMAD_VERSION}.chr${C}.raw.vcf.bgz"
 
-log "Downloading gnomAD v4.1 per-chromosome VCFs to $WORK_DIR ..."
-CHROMS=( {1..22} X Y )
-for chr in "${CHROMS[@]}"; do
-  BGZ="$WORK_DIR/gnomad.genomes.v4.1.sites.chr${chr}.vcf.bgz"
-  TBI="${BGZ}.tbi"
-  if [[ -f "$BGZ" && -f "$TBI" ]]; then
-    log "  chr${chr}: already present, skipping."
-  else
-    log "  chr${chr}: downloading..."
-    gsutil -q cp \
-      "gs://gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr${chr}.vcf.bgz" \
-      "$BGZ"
-    gsutil -q cp \
-      "gs://gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr${chr}.vcf.bgz.tbi" \
-      "$TBI"
+  if [[ ! -f "$LOCAL_RAW" ]]; then
+    log "gnomAD chr${C}: downloading..."
+    gsutil -m cp "$GCS_VCF"      "$LOCAL_RAW"       2>>"$LOG" || err "gsutil failed for chr${C}"
+    gsutil -m cp "${GCS_VCF}.tbi" "${LOCAL_RAW}.tbi" 2>>"$LOG" \
+      || { log "Rebuilding tbi for chr${C}..."; tabix -p vcf "$LOCAL_RAW" 2>>"$LOG"; }
   fi
+
+  if [[ "$CHR_STYLE" == "nochr" ]]; then
+    LOCAL_OUT="$GNOMAD_DIR/gnomad.v${GNOMAD_VERSION}.chr${C}.nochr.vcf.gz"
+    if [[ ! -f "$LOCAL_OUT" ]]; then
+      log "gnomAD chr${C}: converting chr -> nochr..."
+      bcftools annotate \
+        --rename-chrs "$RENAME_MAP" \
+        --threads 2 -Oz -o "$LOCAL_OUT" \
+        "$LOCAL_RAW" 2>>"$LOG" || err "bcftools rename failed for chr${C}"
+      tabix -p vcf "$LOCAL_OUT" 2>>"$LOG"
+    fi
+  else
+    LOCAL_OUT="$GNOMAD_DIR/gnomad.v${GNOMAD_VERSION}.chr${C}.chr.vcf.gz"
+    if [[ ! -f "$LOCAL_OUT" ]]; then
+      bcftools view --threads 2 -Oz -o "$LOCAL_OUT" "$LOCAL_RAW" 2>>"$LOG" \
+        || err "bcftools view failed for chr${C}"
+      tabix -p vcf "$LOCAL_OUT" 2>>"$LOG"
+    fi
+  fi
+  VCF_LIST+=( "$LOCAL_OUT" )
 done
 
-# Build ordered VCF list
-VCF_LIST="$WORK_DIR/vcf.list"; : > "$VCF_LIST"
-ls "$WORK_DIR"/gnomad.genomes.v4.1.sites.chr*.vcf.bgz | sort -V >> "$VCF_LIST"
-[[ -s "$VCF_LIST" ]] || err "No per-chromosome VCFs found in $WORK_DIR"
-
-# Merge
-log "Merging chromosomes -> $MERGED (concat threads=$CONCAT_THREADS)"
-bcftools concat -Oz --threads "$CONCAT_THREADS" -f "$VCF_LIST" -o "$MERGED"
-
-# Index
-log "Indexing merged VCF (threads=$THREADS)"
-bcftools index --tbi --threads "$THREADS" "$MERGED"
-
-# Cleanup per-chromosome files
-log "Cleaning up per-chromosome files..."
-rm -f "$WORK_DIR"/gnomad.genomes.v4.1.sites.chr*.vcf.bgz \
-       "$WORK_DIR"/gnomad.genomes.v4.1.sites.chr*.vcf.bgz.tbi \
-       "$VCF_LIST"
-rmdir "$WORK_DIR" 2>/dev/null || true
-
-log "gnomAD ready: $MERGED"
-echo "$MERGED"
+log "Merging ${#VCF_LIST[@]} gnomAD VCFs -> $MERGED_VCF ..."
+printf '%s\n' "${VCF_LIST[@]}" > "$GNOMAD_DIR/concat_list.txt"
+bcftools concat \
+  --file-list "$GNOMAD_DIR/concat_list.txt" \
+  --allow-overlaps \
+  --threads "$THREADS" \
+  -Oz -o "$MERGED_VCF" 2>>"$LOG" || err "bcftools concat failed"
+tabix -p vcf "$MERGED_VCF" 2>>"$LOG"
+[[ -f "$RENAME_MAP" ]] && rm -f "$RENAME_MAP"
+log "gnomAD merged: $MERGED_VCF"
+echo "$MERGED_VCF"
