@@ -10,8 +10,8 @@
 # If a sample is missing from this file, defaults will be used automatically:
 #   RGID=<SAMPLE>  RGLB=lib1  RGPL=ILLUMINA  RGPU=<SAMPLE>.unit1  RGSM=<SAMPLE>
 #
-# SAMPLE          RGID                    RGLB    RGPL        RGPU                        RGSM
-1493_13_T         1493_13_T.flowcell1     lib1    ILLUMINA    flowcell1.lane1.1493_13_T   1493_13_T
-1493_13_N         1493_13_N.flowcell1     lib1    ILLUMINA    flowcell1.lane1.1493_13_N   1493_13_N
-3507_15_T         3507_15_T.flowcell1     lib1    ILLUMINA    flowcell1.lane1.3507_15_T   3507_15_T
-3507_15_N         3507_15_N.flowcell1     lib1    ILLUMINA    flowcell1.lane1.3507_15_N   3507_15_N
+# SAMPLE  RGID  RGLB  RGPL  RGPU  RGSM
+1493_13_T  1493_13_T.flowcell1  lib1  ILLUMINA  flowcell1.lane1.1493_13_T  1493_13_T
+1493_13_N  1493_13_N.flowcell1  lib1  ILLUMINA  flowcell1.lane1.1493_13_N  1493_13_N
+3507_15_T  3507_15_T.flowcell1  lib1  ILLUMINA  flowcell1.lane1.3507_15_T  3507_15_T
+3507_15_N  3507_15_N.flowcell1  lib1  ILLUMINA  flowcell1.lane1.3507_15_N  3507_15_N
