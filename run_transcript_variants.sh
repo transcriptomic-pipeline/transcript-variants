@@ -279,15 +279,17 @@ run_parallel_items() {
 }
 
 log "Loading RG details: $RG_FILE"
-while read -r sample_id rgid rgsm rglb rgpl rgpu _rest; do
-    [[ -z "${sample_id:-}" ]] && continue
-    [[ "$sample_id" =~ ^# ]] && continue
+# Expected columns (tab-separated):
+# SAMPLE  RGID  RGLB  RGPL  RGPU  RGSM
+while read -r sample_id rgid rglb rgpl rgpu rgsm _rest; do
+  [[ -z "${sample_id:-}" ]] && continue
+  [[ "$sample_id" =~ ^# ]] && continue
 
-    RG_ID["$sample_id"]="$rgid"
-    RG_SM["$sample_id"]="$rgsm"
-    RG_LB["$sample_id"]="$rglb"
-    RG_PL["$sample_id"]="$rgpl"
-    RG_PU["$sample_id"]="$rgpu"
+  RG_ID["$sample_id"]="$rgid"   # Read Group ID
+  RG_LB["$sample_id"]="$rglb"   # Library ID (LIBxxxxx)
+  RG_PL["$sample_id"]="$rgpl"   # Platform (ILLUMINA, etc.)
+  RG_PU["$sample_id"]="$rgpu"   # Platform unit
+  RG_SM["$sample_id"]="$rgsm"   # Sample name in BAM header (1493_13_T, etc.)
 done < "$RG_FILE"
 
 log "Loading sample map: $SAMPLE_MAP"
