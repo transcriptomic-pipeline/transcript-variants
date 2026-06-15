@@ -1,17 +1,17 @@
-# Read Group details for each sample.
-# Lines starting with # are ignored.
-# Columns (tab-separated): SAMPLE  RGID  RGLB  RGPL  RGPU  RGSM
-# SAMPLE   : Internal sample identifier (must match sample IDs in sample_map.txt)
-# RGID     : Read Group ID (e.g., flowcell.lane)
-# RGLB     : Library ID
-# RGPL     : Platform (e.g., ILLUMINA)
-# RGPU     : Platform Unit (e.g., flowcell.lane.barcode)
-# RGSM     : Sample name in BAM header (usually same as SAMPLE)
-# If a sample is missing from this file, defaults will be used automatically:
-#   RGID=<SAMPLE>  RGLB=lib1  RGPL=ILLUMINA  RGPU=<SAMPLE>.unit1  RGSM=<SAMPLE>
-#
-# SAMPLE  RGID  RGLB  RGPL  RGPU  RGSM
-1493_13_T  1493_13_T.flowcell1  lib1  ILLUMINA  flowcell1.lane1.1493_13_T  1493_13_T
-1493_13_N  1493_13_N.flowcell1  lib1  ILLUMINA  flowcell1.lane1.1493_13_N  1493_13_N
-3507_15_T  3507_15_T.flowcell1  lib1  ILLUMINA  flowcell1.lane1.3507_15_T  3507_15_T
-3507_15_N  3507_15_N.flowcell1  lib1  ILLUMINA  flowcell1.lane1.3507_15_N  3507_15_N
+# Read Group details for each sample.					
+# Lines starting with # are ignored.					
+# Columns (tab-separated): SAMPLE  RGID  RGLB  RGPL  RGPU  RGSM					
+# SAMPLE   : Internal sample identifier (must match sample IDs in sample_map.txt)					
+# RGID     : Read Group ID (e.g., flowcell.lane)					
+# RGLB     : Library ID					
+# RGPL     : Platform (e.g., ILLUMINA)					
+# RGPU     : Platform Unit (e.g., flowcell.lane.barcode)					
+# RGSM     : Sample name in BAM header (usually same as SAMPLE)					
+# If a sample is missing from this file, defaults will be used automatically:					
+#   RGID=<Read_Group_ID>  RGLB=lib1  RGPL=ILLUMINA  RGPU=<SAMPLE>.unit1  RGSM=<SAMPLE>					
+#					
+# SAMPLE	RGID	RGLB	RGPL	RGPU	RGSM
+1493_13_T	178787	LIB89681	ILLUMINA	NEBNext_P71_F11	1493_13_T
+1493_13_N	178786	LIB89680	ILLUMINA	NEBNext_P70_F10	1493_13_N
+3507_15_T	178779	LIB89689	ILLUMINA	NEBNext_P79_G7	3507_15_T
+3507_15_N	178778	LIB89688	ILLUMINA	NEBNext_P78_G6	3507_15_N
