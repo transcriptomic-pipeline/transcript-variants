@@ -400,11 +400,12 @@ preprocess_sample() {
     local sdir="$OUT_DIR/$sample"
     local slog="$LOG_DIR/${sample}_preprocess.log"
 
-    local sorted_bam="$sdir/${sample}_sorted.bam"
-    local dedup_bam="$sdir/${sample}_dedup.bam"
-    local bqsr_table="$sdir/${sample}_bqsr.table"
-    local recal_bam="$sdir/${sample}_recal.bam"
-    local dup_metrics="$sdir/${sample}_dup_metrics.txt"
+    sorted_bam="$sdir/${sample}_sorted.bam"      # AddOrReplaceReadGroups output
+    dedup_bam="$sdir/${sample}_dedup.bam"        # MarkDuplicates output
+    dup_metrics="$sdir/${sample}_dedup_metrics.txt"
+    split_bam="$sdir/${sample}_split.bam"        # NEW: SplitNCigarReads output
+    bqsr_table="$sdir/${sample}_bqsr.table"
+    recal_bam="$sdir/${sample}_recal.bam"
 
     local rg_id="${RG_ID[$sample]:-}"
     local rg_sm="${RG_SM[$sample]:-}"
@@ -431,6 +432,7 @@ preprocess_sample() {
 
     log "Preprocessing $sample ..."
 
+    # 1) Add or replace read groups (sorted.bam)
     if [[ ! -f "$sorted_bam" ]]; then
         java -jar "$PICARD_JAR" AddOrReplaceReadGroups \
             I="$input_bam" \
@@ -449,6 +451,7 @@ preprocess_sample() {
             }
     fi
 
+    # 2) Mark duplicates (dedup.bam)
     if $MARKDUP; then
         if [[ ! -f "$dedup_bam" ]]; then
             java -jar "$PICARD_JAR" MarkDuplicates \
@@ -467,9 +470,22 @@ preprocess_sample() {
         [[ -f "${dedup_bam}.bai" ]] || "$SAMTOOLS_BIN" index -@ 2 "$dedup_bam" >> "$slog" 2>&1
     fi
 
+    # 3) SplitNCigarReads (split.bam) — RNA‑seq specific
+    if [[ ! -f "$split_bam" ]]; then
+        "$GATK_BIN" SplitNCigarReads \
+            -R "$REF_FA" \
+            -I "$dedup_bam" \
+            -O "$split_bam" \
+            >> "$slog" 2>&1 || {
+                echo "[$(date '+%F %T')] ERROR: SplitNCigarReads failed for $sample" | tee -a "$MAIN_LOG" >&2
+                return 1
+            }
+    fi
+
+    # 4) BaseRecalibrator on split.bam
     if [[ ! -f "$bqsr_table" ]]; then
         "$GATK_BIN" BaseRecalibrator \
-            -I "$dedup_bam" \
+            -I "$split_bam" \
             -R "$REF_FA" \
             --known-sites "$DBSNP_VCF" \
             --known-sites "$MILLS_VCF" \
@@ -480,9 +496,10 @@ preprocess_sample() {
             }
     fi
 
+    # 5) ApplyBQSR on split.bam → recal.bam
     if [[ ! -f "$recal_bam" ]]; then
         "$GATK_BIN" ApplyBQSR \
-            -I "$dedup_bam" \
+            -I "$split_bam" \
             -R "$REF_FA" \
             --bqsr-recal-file "$bqsr_table" \
             -O "$recal_bam" \
@@ -492,6 +509,7 @@ preprocess_sample() {
             }
     fi
 
+    # 6) Index final recal BAM
     if [[ ! -f "${recal_bam}.bai" ]]; then
         "$SAMTOOLS_BIN" index -@ 2 "$recal_bam" >> "$slog" 2>&1 || {
             echo "[$(date '+%F %T')] ERROR: samtools index failed for $sample recal BAM" | tee -a "$MAIN_LOG" >&2
