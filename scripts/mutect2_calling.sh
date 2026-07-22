@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#Author: Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India
+#Date: 09/02/2025
+#Purpose: Somatic variant calling from preprocessed tumor RNA-seq BAM files using GATK Mutect2 in tumor-only mode with Panel of Normals (PoN) and gnomAD population allele frequency database
+
 # scripts/mutect2_calling.sh
 # Mutect2 somatic calling: tumor-normal paired OR tumor-only fallback.
 # Tumor-only mode is used automatically when --normal-bam / --normal-sm are absent,
