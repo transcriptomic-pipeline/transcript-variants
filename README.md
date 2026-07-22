@@ -59,18 +59,23 @@ transcript-variants/
 ## Pipeline Steps
 
 Preprocessing (gatk_preprocess.sh)
+
 └── MarkDuplicates (Picard) → SplitNCigarReads → BQSR → Recalibrated BAM
 
 Panel of Normals (build_pon.sh)
+
 └── Mutect2 (tumor-only on normals) → GenomicsDBImport → CreateSomaticPanelOfNormals → PoN VCF
 
 gnomAD Download (download_gnomad.sh)
+
 └── Download + index gnomAD v3.1.2 VCF
 
 Variant Calling (mutect2_calling.sh)
+
 └── Mutect2 (tumor-only + PoN + gnomAD) → GetPileupSummaries → CalculateContamination → FilterMutectCalls
 
 PASS Filtering (filter_pass.sh)
+
 └── bcftools/GATK filter → PASS-only somatic VCF
 
 
@@ -130,14 +135,23 @@ bash scripts/build_pon.sh \
 ## Output Structure
 
 variant_results/
+
 ├── preprocessed/
+
 │ └── [sample]_recal.bam # BQSR-recalibrated BAM
+
 ├── vcf/
+
 │ ├── [sample]_mutect2.vcf.gz # Raw Mutect2 calls
+
 │ ├── [sample]_filtered.vcf.gz # After FilterMutectCalls
+
 │ └── [sample]_PASS.vcf.gz # Final PASS-only somatic variants
+
 ├── contamination/
+
 │ └── [sample]_contamination.table
+
 └── logs/
 
 ## Contact & Citation
