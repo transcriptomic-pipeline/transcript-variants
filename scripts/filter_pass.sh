@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#Author: Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India
+#Date: 09/02/2025
+#Purpose: Post-filtering of Mutect2 variant calls to retain only PASS-tagged somatic variants from tumor RNA-seq samples after FilterMutectCalls quality evaluation
+
 # scripts/filter_pass.sh — Extract PASS-only variants from a Mutect2 filtered VCF
 
 set -euo pipefail
