@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#Author: Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India
+#Date: 09/02/2025
+#Purpose: Download and index the gnomAD population allele frequency VCF resource required for GATK Mutect2 somatic variant filtering in the transcriptomic variant calling pipeline
+
 # scripts/download_gnomad.sh — Download and merge gnomAD v4.1 per-chromosome VCFs.
 # gnomAD v4.1 ships with chr-prefix (UCSC); handles conversion to nochr (Ensembl).
 # Prints final merged VCF path to stdout (captured by install.sh).
