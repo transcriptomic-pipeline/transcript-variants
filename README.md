@@ -2,7 +2,8 @@
 
 Somatic variant calling from RNA-seq BAM files of the tumor samples using GATK Mutect2. Includes GATK best-practice preprocessing (duplicate marking, SplitNCigarReads, BQSR), Panel of Normals (PoN) construction, gnomAD population filtering, and PASS variant extraction.
 
-**Author:** Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India  
+**Author:** Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India
+**Supervisor:** Dr. Jyoti Sharma, Institute of Bioinformatics (IOB), Bangalore, India
 **Date:** 09/02/2025  
 **Part of:** Automated Transcriptomic Analysis Pipeline
 
@@ -128,7 +129,13 @@ variant_results/
 │ └── [sample]_contamination.table
 └── logs/
 
+## Contact & Citation
 
+**Babul Pradhan** — babul@ibioinformatics.com
+**Supervisor:** Dr. Jyoti Sharma, Institute of Bioinformatics (IOB), Bangalore, India
+GitHub: [babulpradhan1](https://github.com/babulpradhan1)
+
+If you use this module in your research, please cite:
 ---
 
 ## Notes
