@@ -162,9 +162,3 @@ GitHub: [babulpradhan1](https://github.com/babulpradhan1)
 
 If you use this module in your research, please cite:
 ---
-
-## Notes
-
-- gnomAD v3.1.2 (GRCh38) is used for population allele frequency filtering
-- PoN reduces germline and technical artefact calls
-- Designed for **tumor-only** calling (no matched normal RNA-seq required)
