@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#Author: Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India
+#Date: 09/02/2025
+#Purpose: GATK preprocessing of RNA-seq BAM files from the cancer samples including duplicate marking with Picard, SplitNCigarReads, and Base Quality Score Recalibration (BQSR) prior to somatic variant calling
+
 # scripts/gatk_preprocess.sh — AddOrReplaceReadGroups, optional MarkDuplicates,
 # SplitNCigarReads, BaseRecalibrator, ApplyBQSR
 
