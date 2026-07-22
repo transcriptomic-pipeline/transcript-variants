@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#Author: Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India
+#Date: 09/02/2025
+#Purpose: Installation script for setting up GATK, SAMtools, and Picard tools required for the transcript variant calling module of the transcriptomic analysis pipeline
+
 # install.sh — Install tools and references for transcript-variants pipeline.
 # Downloads dbSNP 146 (hg38) and Mills indels from Broad FTP bundle.
 # Optionally downloads gnomAD v4.1.
