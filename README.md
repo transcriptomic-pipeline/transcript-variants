@@ -30,16 +30,27 @@ This module identifies somatic single nucleotide variants (SNVs) and small inser
 ## Repository Structure
 
 transcript-variants/
+
 ├── run_transcript_variants.sh # Main orchestration script
+
 ├── install.sh # Tool installation script
+
 ├── config/ # Tool path configuration
+
 ├── scripts/
+
 │ ├── gatk_preprocess.sh # Duplicate marking, SplitNCigarReads, BQSR
+
 │ ├── mutect2_calling.sh # Somatic variant calling with Mutect2
+
 │ ├── build_pon.sh # Panel of Normals construction
+
 │ ├── download_gnomad.sh # gnomAD allele frequency VCF download
+
 │ └── filter_pass.sh # PASS variant filtering post-FilterMutectCalls
+
 ├── README.md
+
 └── LICENSE
 
 
