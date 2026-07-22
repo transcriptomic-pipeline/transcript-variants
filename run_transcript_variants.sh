@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#Author: Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India
+#Date: 09/02/2025
+#Purpose: End-to-end somatic variant calling pipeline for tumor RNA-seq BAM files using GATK Mutect2, including BQSR preprocessing, Panel of Normals (PoN) construction, gnomAD filtering, and PASS variant extraction
+
 # run_transcript_variants.sh — Somatic variant calling pipeline
 # Key fixes:
 #   1. No exported-function/xargs dependency
