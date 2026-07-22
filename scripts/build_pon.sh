@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#Author: Babul Pradhan, Ph.D. Student, Institute of Bioinformatics (IOB), Bangalore, India
+#Date: 09/02/2025
+#Purpose: Construction of a Panel of Normals (PoN) from normal tissue RNA-seq BAM files using GATK Mutect2 to improve somatic variant filtering specificity in the tumor samples
+
 # scripts/build_pon.sh — per-normal Mutect2 tumor-only -> GenomicsDBImport -> CreateSomaticPanelOfNormals
 
 set -euo pipefail
