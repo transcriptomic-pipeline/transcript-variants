@@ -1,4 +1,4 @@
-# Transcript Variants Module — Transcriptomic Pipeline
+# Transcript Variants Module - Transcriptomic Pipeline
 
 Somatic variant calling from RNA-seq BAM files of the tumor samples using GATK Mutect2. Includes GATK best-practice preprocessing (duplicate marking, SplitNCigarReads, BQSR), Panel of Normals (PoN) construction, gnomAD population filtering, and PASS variant extraction.
 
